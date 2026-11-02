@@ -169,6 +169,12 @@ class CyberchaseApp {
       height: 480, // 15 rows * 32px
       parent: 'phaser-container',
       backgroundColor: '#050611',
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 672,
+        height: 480
+      },
       physics: {
         default: 'arcade',
         arcade: { gravity: { y: 0 }, debug: false }
@@ -177,6 +183,25 @@ class CyberchaseApp {
     };
 
     this.phaserGame = new Phaser.Game(config);
+
+    // Responsive scale refresh on window resize & fullscreen toggle
+    window.addEventListener('resize', () => {
+      if (this.phaserGame && this.phaserGame.scale) {
+        try {
+          this.phaserGame.scale.refresh();
+        } catch (_) {}
+      }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+      setTimeout(() => {
+        if (this.phaserGame && this.phaserGame.scale) {
+          try {
+            this.phaserGame.scale.refresh();
+          } catch (_) {}
+        }
+      }, 80);
+    });
 
     // Grab scene reference once ready
     this.phaserGame.events.once('ready', () => {
@@ -416,7 +441,16 @@ class CyberchaseApp {
     if (regScreen) regScreen.classList.add('hidden');
     if (menuScreen) menuScreen.classList.add('hidden');
     if (goScreen) goScreen.classList.add('hidden');
-    if (gameScreen) gameScreen.classList.remove('hidden');
+    if (gameScreen) {
+      gameScreen.classList.remove('hidden');
+      setTimeout(() => {
+        if (this.phaserGame && this.phaserGame.scale) {
+          try {
+            this.phaserGame.scale.refresh();
+          } catch (_) {}
+        }
+      }, 50);
+    }
 
     // Record attempt as actively started
     if (this.currentPlayer && this.currentPlayer.enrollmentNumber) {
